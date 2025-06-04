@@ -77,12 +77,12 @@ func (s *serviceBImpl3) BBB() {
 
 func TestDI(t *testing.T) {
 	di := New()
-	di.Register(NewServiceA)
-	di.Register(NewServiceB)
-	di.Register(NewServiceBImpl)
-	di.RegisterAlias("xxx", NewServiceB2)
+	Register(di, NewServiceA)
+	Register(di, NewServiceB)
+	Register(di, NewServiceBImpl)
+	RegisterAlias(di, "xxx", NewServiceB2)
 	var s ServiceA
-	di.Build(&s)
+	Build(di, &s)
 	s.AAA()
 	di.Clean()
 }
