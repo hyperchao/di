@@ -25,7 +25,7 @@ func Register[T any](f func() T) {
 }
 
 func RegisterAlias[T any](name string, f func() T) {
-	RegisterDI[T](di, f)
+	RegisterAliasDI[T](di, name, f)
 }
 
 func Get[T any]() T {
