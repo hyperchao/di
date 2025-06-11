@@ -152,6 +152,9 @@ func assert(pass bool, err error) {
 
 func (d *DI) Clean() {
 	for _, v := range d.typeRepo {
+		if _, ok := v.Interface().(*DI); ok {
+			continue
+		}
 		if cleaner, ok := v.Interface().(Cleaner); ok {
 			cleaner.Clean()
 		}
