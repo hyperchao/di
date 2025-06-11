@@ -12,6 +12,30 @@ const (
 	diAlias = "alias"
 )
 
+var (
+	di = New()
+)
+
+func Global() *DI {
+	return di
+}
+
+func Register[T any](f func() T) {
+	RegisterAlias[T]("", f)
+}
+
+func RegisterAlias[T any](name string, f func() T) {
+	RegisterDI[T](di, f)
+}
+
+func Get[T any]() T {
+	return GetAlias[T]("")
+}
+
+func GetAlias[T any](name string) T {
+	return GetDI[T](di)
+}
+
 type alias struct {
 	t    reflect.Type
 	name string
@@ -34,11 +58,11 @@ func New() *DI {
 	return di
 }
 
-func Register[T any](d *DI, f func() T) {
-	RegisterAlias(d, "", f)
+func RegisterDI[T any](d *DI, f func() T) {
+	RegisterAliasDI(d, "", f)
 }
 
-func RegisterAlias[T any](d *DI, name string, f func() T) {
+func RegisterAliasDI[T any](d *DI, name string, f func() T) {
 	rt := reflect.TypeFor[T]()
 	key := alias{
 		t:    rt,
@@ -51,13 +75,15 @@ func RegisterAlias[T any](d *DI, name string, f func() T) {
 	}
 }
 
-func Build[T any](d *DI, p *T) {
-	BuildAlias(d, "", p)
+func GetDI[T any](d *DI) T {
+	return GetAliasDI[T](d, "")
 }
 
-func BuildAlias[T any](d *DI, name string, p *T) {
+func GetAliasDI[T any](d *DI, name string) T {
 	rt := reflect.TypeFor[T]()
-	reflect.ValueOf(p).Elem().Set(build(d, alias{t: rt, name: name}))
+	var instance T
+	reflect.ValueOf(&instance).Elem().Set(build(d, alias{t: rt, name: name}))
+	return instance
 }
 
 func build(d *DI, a alias) reflect.Value {
@@ -100,8 +126,8 @@ func buildStruct(d *DI, v reflect.Value) {
 	}
 }
 
-func getAliasName(tag string) (name string) {
-	tagMap := make(map[string]string, 2)
+func getTagMap(tag string) map[string]string {
+	tagMap := make(map[string]string, 3)
 	for _, part := range strings.Split(tag, ";") {
 		kvs := strings.Split(part, ":")
 		if len(kvs) == 1 {
@@ -110,6 +136,11 @@ func getAliasName(tag string) (name string) {
 			tagMap[kvs[0]] = kvs[1]
 		}
 	}
+	return tagMap
+}
+
+func getAliasName(tag string) (name string) {
+	tagMap := getTagMap(tag)
 	return tagMap[diAlias]
 }
 
