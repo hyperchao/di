@@ -21,7 +21,7 @@ func Global() *DI {
 }
 
 func Register[T any](f func() T) {
-	RegisterAlias[T]("", f)
+	RegisterDI[T](di, f)
 }
 
 func RegisterAlias[T any](name string, f func() T) {
@@ -29,11 +29,11 @@ func RegisterAlias[T any](name string, f func() T) {
 }
 
 func Get[T any]() T {
-	return GetAlias[T]("")
+	return GetDI[T](di)
 }
 
 func GetAlias[T any](name string) T {
-	return GetDI[T](di)
+	return GetAliasDI[T](di, name)
 }
 
 type alias struct {
